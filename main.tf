@@ -525,7 +525,6 @@ resource "aws_launch_configuration" "webpage_launch_configuration" {
   associate_public_ip_address = true
 
 
-
   user_data = <<-EOF
     #!/bin/bash
     echo "<html><body><h1>Web Page test!</h1></body></html>" > /var/www/html/index.html
