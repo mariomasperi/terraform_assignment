@@ -7,6 +7,8 @@ import boto3
 import time
 import logging
 
+
+
 os.environ["AWS_DEFAULT_REGION"] = 'us-east-2'
 
 @pytest.fixture(scope="session")
