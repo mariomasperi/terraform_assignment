@@ -50,6 +50,8 @@ The project use external libraries and services to function:
 
 2. Run the following command in the IDE terminal:
   *python -m pytest test_webapp.py* 
+  
+  It will take sometime to create the infrastructure, after that the test should be seen as passed.
 
 
 
