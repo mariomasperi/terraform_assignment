@@ -36,6 +36,21 @@ The project use external libraries and services to function:
 
 <img width="1457" alt="image" src="https://github.com/mariomasperi/terraform_assignment/assets/10673190/24db7096-829b-4754-a935-2a61a8dde620">
 
+4. Paste the address on your web browser and you should be able to display the following page:
+
+<img width="857" alt="image" src="https://github.com/mariomasperi/terraform_assignment/assets/10673190/8ef16c9f-c2a7-4bec-be1d-8ec7a35f80b3">
+
+# How to test?
+
+1. You can alternatively test the application running a Pytest script instead, the code will create the infrastructure and provide you a assert status
+  To do that you need to pull the file **test_webapp.py** in your IDE and perform  the following changes to the code:
+  - Insert your project path in the following function:
+
+<img width="548" alt="image" src="https://github.com/mariomasperi/terraform_assignment/assets/10673190/179c3f85-a160-41a7-b167-f0bce1f61712">
+
+2. Run the following command in the IDE terminal:
+  *python -m pytest test_webapp.py* 
+
 
 
 
