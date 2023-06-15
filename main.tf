@@ -1,6 +1,5 @@
 # Provider configuration
 provider "aws" {
-  #version = "5.0.1"
   region = "us-east-2" # region
 }
 
@@ -126,14 +125,6 @@ resource "aws_route_table" "private_route_table" {
 
 }
 
-/*
-resource "aws_route" "private_subnet_route" {
-  route_table_id         = aws_route_table.private_route_table.id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.nat_gateway.id
-  depends_on = [aws_internet_gateway.webpage_igw]
-}*/
-
 # Create private subnets
 resource "aws_subnet" "private_subnet_1" {
   vpc_id                  = aws_vpc.webpage_vpc.id
@@ -242,24 +233,7 @@ resource "aws_network_acl" "private_network_acl" {
   tags = {
     Name = "private_network_acl"
   }
-/*
-  ingress {
-    rule_no       = 100
-    protocol      = "tcp"
-    action        = "allow"
-    cidr_block    = "0.0.0.0/0"
-    from_port     = 80
-    to_port       = 80
-  }
 
-  egress {
-    rule_no       = 100
-    protocol      = "tcp"
-    action        = "allow"
-    cidr_block    = "0.0.0.0/0"
-    from_port     = 0
-    to_port       = 65535
-  } */
 }
 # Create network ACL associations for public subnets
 resource "aws_network_acl_association" "public_network_acl_association_1" {
@@ -313,8 +287,7 @@ resource "aws_security_group" "webpage_sg" {
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-    #cidr_blocks = [aws_subnet.public_subnet_1.cidr_block,aws_subnet.public_subnet_2.cidr_block,
-    #aws_subnet.public_subnet_3.cidr_block, aws_subnet.public_subnet_4.cidr_block,]
+
   }
 
   ingress {
@@ -343,47 +316,9 @@ resource "aws_security_group" "webpage_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-    #cidr_blocks = [aws_subnet.private_subnet_1.cidr_block, aws_subnet.private_subnet_2.cidr_block,
-    #aws_subnet.private_subnet_3.cidr_block, aws_subnet.private_subnet_4.cidr_block,]
+
   }
 }
-
-/*
-resource "aws_security_group_rule" "webpage_ssh_inbound" {
-  security_group_id = aws_security_group.webpage_sg.id
-  type              = "ingress"
-  from_port         = 22
-  to_port           = 22
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
-
-
-resource "aws_security_group_rule" "webpage_http_outbound" {
-  security_group_id = aws_security_group.webpage_sg.id
-  type              = "egress"
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-}*/
-
-/*
-resource "aws_security_group_rule" "webpage_ssh_outbound" {
-  security_group_id = aws_security_group.webpage_sg.id
-  type              = "egress"
-  from_port         = 22
-  to_port           = 22
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
-
-# Output the VPC ID
-output "vpc_id" {
-  value = aws_vpc.webpage_vpc.id
-}
-*/
-
 
 # Create load balancer 1
 resource "aws_lb" "webpage_lb_1" {
@@ -392,14 +327,6 @@ resource "aws_lb" "webpage_lb_1" {
   security_groups    = [aws_security_group.webpage_sg.id]
   subnets            = [aws_subnet.public_subnet_1.id, aws_subnet.public_subnet_2.id]
 
-  /*
-  subnet_mapping {
-    subnet_id = aws_subnet.public_subnet_1.id
-  }
-
-  subnet_mapping {
-    subnet_id = aws_subnet.public_subnet_2.id
-  }*/
 
   tags = {
     Name = "webpage-lb-1"
@@ -414,37 +341,12 @@ resource "aws_lb" "webpage_lb_2" {
   security_groups    = [aws_security_group.webpage_sg.id]
   subnets            = [aws_subnet.public_subnet_3.id, aws_subnet.public_subnet_4.id]
 
-  /*
-  subnet_mapping {
-    subnet_id = aws_subnet.public_subnet_3.id
-  }
-
-  subnet_mapping {
-    subnet_id = aws_subnet.public_subnet_4.id
-  }*/
-
   tags = {
     Name = "webpage-lb-2"
   }
 
 
   }
-
-
-  /*
-resource "aws_lb" "webpage_lb_2" {
-  name               = "webpage-lb-2"
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.webpage_sg.id]
-  #subnets            = [aws_subnet.public_subnet_2.id]
-
-
-  subnet_mapping {
-    subnet_id = aws_subnet.public_subnet_2.id
-  }
-}
-*/
-
 
 
 # Create target group 1
@@ -514,32 +416,6 @@ resource "aws_lb_listener" "webpage_listener_2" {
 
 }
 
-/*
-# Create launch configuration
-resource "aws_launch_configuration" "webpage_launch_configuration" {
-  name          = "webpage-launch-configuration"
-  image_id      = "ami-05842f1afbf311a43"  # AMI ID
-  instance_type = "t2.micro"
-  key_name      = "EC2-key-pair"
-  security_groups             = [aws_security_group.webpage_sg.id]
-  associate_public_ip_address = true
-
-
-  user_data = <<-EOF
-    #!/bin/bash
-    echo "<html><body><h1>Web Page test!</h1></body></html>" > /var/www/html/index.html
-    sudo yum update -y
-    sudo yum install -y httpd
-    sudo systemctl start httpd
-    sudo systemctl enable httpd
-
-    # Install EC2 Instance Connect
-    sudo yum install -y amazon-ec2-instance-connect
-    sudo systemctl enable ec2-instance-connect.service
-
-  EOF
-}
-*/
 
 data "template_file" "user_data" {
   template = <<-EOF
@@ -559,14 +435,11 @@ resource "aws_launch_template" "webpage_launch_template" {
   image_id      = "ami-05842f1afbf311a43"  # AMI ID
   instance_type = "t2.micro"
   key_name      = "EC2-key-pair"
-  #security_group_names = [aws_security_group.webpage_sg.name]
-  #security_group_names        = [aws_security_group.webpage_sg.name]
   network_interfaces {
     security_groups = [aws_security_group.webpage_sg.id]
     associate_public_ip_address = true
 
   }
-  #vpc_security_group_ids = [aws_security_group.webpage_sg.id]
 
   monitoring {
     enabled = true
@@ -575,23 +448,10 @@ resource "aws_launch_template" "webpage_launch_template" {
   user_data = base64encode(data.template_file.user_data.rendered)
 }
 
-  /*
-  user_data = <<-EOF
-    #!/bin/bash
-    echo "<html><body><h1>Web Page test!</h1></body></html>" > /var/www/html/index.html
-    sudo yum update -y
-    sudo yum install -y httpd
-    sudo systemctl start httpd
-    sudo systemctl enable httpd
-  EOF
-  */
-
-
 
 # Create auto scaling group
 resource "aws_autoscaling_group" "webpage_autoscaling_group" {
   name                      = "webpage-autoscaling-group"
-  #launch_configuration      = aws_launch_configuration.webpage_launch_configuration.name
   min_size                  = 2
   max_size                  = 4
   desired_capacity          = 2

@@ -1,5 +1,4 @@
 import os
-import sys
 import pytest
 import subprocess
 import requests
@@ -21,14 +20,12 @@ def terraform_dir():
 
 @pytest.fixture(scope="session")
 def load_balancer_name():
-    #region_name = "us-east-2"
     elbv2 = boto3.client('elbv2')
     response = elbv2.describe_load_balancers(Names=['webpage-lb-1'])
     if 'LoadBalancers' in response and response['LoadBalancers']:
         return response['LoadBalancers'][0]['LoadBalancerName']
     else:
         raise ValueError("Load balancer not found.")
-    #return sys.argv[2]
 
 
 @pytest.fixture(scope="session")
@@ -60,8 +57,6 @@ def test_terraform_apply(terraform_dir, terraform_init):
 
 
 def test_webpage_reachable(load_balancer_name):
-    #os.environ["AWS_DEFAULT_REGION"] = "us-east-2a"
-    #region_name = "us-east-2"
     client = boto3.client("elbv2")
     response = client.describe_load_balancers(Names=[load_balancer_name])
     load_balancer_dns = response["LoadBalancers"][0]["DNSName"]
